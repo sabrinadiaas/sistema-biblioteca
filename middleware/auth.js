@@ -1,0 +1,1 @@
+// permissões do sistema para garantir que apenas bibliotecários gerenciem o acervo e apenas leitores solicitem empréstimos

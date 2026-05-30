@@ -1,0 +1,25 @@
+{
+  "name": "sistema-biblioteca",
+  "version": "1.0.0",
+  "description": "Sistema para gerenciar empréstimos de livros.",
+  "homepage": "https://github.com/sabrinadiaas/sistema-biblioteca#readme",
+  "bugs": {
+    "url": "https://github.com/sabrinadiaas/sistema-biblioteca/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sabrinadiaas/sistema-biblioteca.git"
+  },
+  "license": "ISC",
+  "author": "Sabrina Dias",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  }
+}
