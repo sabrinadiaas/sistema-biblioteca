@@ -1,19 +1,29 @@
 const express = require('express');
 const app = express();
-app.use(express.json());
+const PORT = 3000;
 
 const db = require('./db'); 
 
-app.use(express.static('public'));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
 
 const apiRoutes = require('./routes/api');
-app.use('/api/users', apiRoutes);
+app.use(express.json());
+app.use('/api', apiRoutes);
 
-app.get('/api', (req, res) => {
-    res.send('API da Biblioteca rodando perfeitamente!');
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-const PORT = 3000;
+app.get('/api', (req, res) => {
+    res.json({ message: 'Bem-vindo à API do sistema de biblioteca!' });
+});
+
+app.get('/api/registrar', (req, res) => {
+    res.json({ message: 'Rota de registro de usuário.' });
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
