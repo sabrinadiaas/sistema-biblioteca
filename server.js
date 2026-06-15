@@ -11,6 +11,12 @@ const apiRoutes = require('./routes/api');
 app.use(express.json());
 app.use('/api', apiRoutes);
 
+const livrosRoutes = require('./routes/livros');
+const emprestimosRoutes = require('./routes/emprestimos');
+
+app.use('/api/livros', livrosRoutes);
+app.use('/api/emprestimos', emprestimosRoutes);
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
