@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Biblioteca - Painel do Leitor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container wide-container">
+        <div class="header-painel">
+            <h2>Painel do Leitor</h2>
+            <button id="logout-btn" class="btn-logout">Sair</button>
+        </div>
+
+        <div id="feedback-msg" class="message"></div>
+
+        <div class="secao-tabela">
+            <h3>📚 Catálogo de Livros Disponíveis</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Ano</th>
+                        <th>Estoque</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="livros-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="secao-tabela">
+            <h3>⏳ Seção "Meus empréstimos"</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Livro</th>
+                        <th>Data Empréstimo</th>
+                        <th>Devolução Prevista</th>
+                        <th>Status Atual</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="emprestimos-list">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="leitor.js"></script>
+</body>
+</html>
