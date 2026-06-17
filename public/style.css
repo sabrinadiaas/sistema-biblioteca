@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -186,7 +185,6 @@ button:hover {
     background-color: #5a6268;
 }
 
-/* --- 7. BADGES DE STATUS --- */
 .status-badge {
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
@@ -231,4 +229,102 @@ button:hover {
 
 .hidden {
     display: none !important;
+}
+
+body {
+    display: block !important; 
+}
+
+.panel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 1rem;
+}
+
+.header-panel h2 {
+    margin-bottom: 0;
+    text-align: left;
+    font-size: 1.8rem;
+    color: #222;
+}
+
+.section-box {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.inline-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.inline-form .form-group {
+    margin: 0;
+}
+
+.inline-form button, .actions-btns button {
+    margin: 0;
+    width: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.actions-btns {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.edit-btn:hover {
+    background-color: #e0a905;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #bd2130;
+}
+
+.approve-btn {
+    background-color: #28a745;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.logout-btn {
+    background-color: #6c757d;
+    width: auto;
+    padding: 0.5rem 1rem;
+    margin: 0;
+}
+
+.logout-btn:hover {
+    background-color: #5a6268;
+}
+
+.panel-container table th {
+    background-color: #0056b3;
+    color: white;
 }
