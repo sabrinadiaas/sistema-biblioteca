@@ -2,7 +2,6 @@ const API_URL = 'http://localhost:3000/api';
 const token = localStorage.getItem('token');
 const perfil = localStorage.getItem('userPerfil');
 
-
 if (!token || perfil !== 'leitor') {
     alert('Acesso negado! Por favor, faça login.');
     window.location.href = 'index.html';
@@ -27,6 +26,13 @@ const obterHeaders = () => ({
     'Authorization': `Bearer ${token}`
 });
 
+let meusEmprestimosGlobais = [];
+
+async function inicializarDados() {
+    await carregarEmprestimos();
+    await carregarLivros();      
+}
+
 
 async function carregarLivros() {
     try {
@@ -48,22 +54,31 @@ function renderizarTabelaLivros(livros) {
         const tr = document.createElement('tr');
         const estaEsgotado = livro.quantidade_disponivel <= 0;
 
+        const jaSolicitado = meusEmprestimosGlobais.find(emp => emp.livro_id === livro.id && emp.status !== 'devolvido');
+
+        let botaoConfig = '';
+
+        if (jaSolicitado) {
+            botaoConfig = `<button class="btn-tabela" disabled style="background-color: #e0a800; color: white; cursor: not-allowed; font-weight: bold;">
+                ${jaSolicitado.data_devolucao_real ? 'Aguardando Devolução...' : 'Aguardando Entrega...'}
+            </button>`;
+        } else if (estaEsgotado) {
+            botaoConfig = `<button class="btn-tabela" disabled style="background-color:#ccc; cursor:not-allowed;">Esgotado</button>`;
+        } else {
+            botaoConfig = `<button class="btn-tabela" onclick="solicitarEmprestimo(${livro.id})">Solicitar</button>`;
+        }
+
         tr.innerHTML = `
             <td>${livro.id}</td>
             <td><strong>${livro.titulo}</strong></td>
             <td>${livro.autor}</td>
             <td>${livro.ano_publicacao || '-'}</td>
             <td>${livro.quantidade_disponivel}</td>
-            <td>
-                <button class="btn-tabela" onclick="solicitarEmprestimo(${livro.id})" ${estaEsgotado ? 'disabled style="background-color:#ccc; cursor:not-allowed;"' : ''}>
-                    ${estaEsgotado ? 'Esgotado' : 'Solicitar'}
-                </button>
-            </td>
+            <td>${botaoConfig}</td>
         `;
         tbody.appendChild(tr);
     });
 }
-
 
 async function solicitarEmprestimo(livroId) {
     clearFeedback();
@@ -71,20 +86,18 @@ async function solicitarEmprestimo(livroId) {
         const response = await fetch(`${API_URL}/emprestimos`, {
             method: 'POST',
             headers: obterHeaders(),
-            body: JSON.stringify({ livro_id: livroId }) 
+            body: JSON.stringify({ livro_id: livroId })
         });
         
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Erro ao solicitar empréstimo.');
 
-        showFeedback('Empréstimo realizado com sucesso!', 'success');
-        carregarLivros();
-        carregarEmprestimos();
+        showFeedback('Empréstimo realizado com sucesso! Verifique a tabela abaixo.', 'success');
+        await inicializarDados();
     } catch (error) {
         showFeedback(error.message, 'error');
     }
 }
-
 
 async function carregarEmprestimos() {
     try {
@@ -92,6 +105,7 @@ async function carregarEmprestimos() {
         const emprestimos = await response.json();
         if (!response.ok) throw new Error(emprestimos.error || 'Erro ao carregar seus empréstimos.');
         
+        meusEmprestimosGlobais = emprestimos;
         renderizarTabelaEmprestimos(emprestimos);
     } catch (error) {
         showFeedback(error.message, 'error');
@@ -102,31 +116,44 @@ function renderizarTabelaEmprestimos(emprestimos) {
     const tbody = document.getElementById('emprestimos-list');
     tbody.innerHTML = '';
 
+    if (emprestimos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#777;">Você não possui empréstimos registrados.</td></tr>`;
+        return;
+    }
+
     emprestimos.forEach(emp => {
         const tr = document.createElement('tr');
         const dataEmprestimo = new Date(emp.data_emprestimo).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         const dataPrevista = new Date(emp.data_devolucao_prevista).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
         let botaoAcao = '';
-        if (emp.status === 'ativo') {
+        let textoStatusVisual = '';
+
+        if (emp.status === 'ativo' && emp.data_devolucao_real) {
+            textoStatusVisual = 'Aguardando Aprovação...'; 
+            botaoAcao = `<span style="color: #e0a800; font-weight: bold;">Solicitado</span>`;
+        } else if (emp.status === 'ativo') {
+            textoStatusVisual = 'Em Uso (Ativo)';
             botaoAcao = `<button class="btn-tabela btn-devolver" onclick="solicitarDevolucao(${emp.id})">Solicitar Devolução</button>`;
-        } else if (emp.status === 'pendente') {
-            botaoAcao = `<span style="color: #e0a800; font-weight: bold;">Aguardando...</span>`;
         } else {
-            botaoAcao = `<span style="color: #28a745; font-weight: bold;">✔ Devolvido</span>`;
+            textoStatusVisual = 'Devolvido';
+            botaoAcao = `<span style="color: #28a745; font-weight: bold;">✔ Concluído</span>`;
         }
 
         tr.innerHTML = `
             <td><strong>${emp.nome_livro}</strong></td>
             <td>${dataEmprestimo}</td>
             <td>${dataPrevista}</td>
-            <td><span class="status-badge status-${emp.status}">${emp.status.toUpperCase()}</span></td>
+            <td>
+                <span class="status-badge status-${emp.status}">
+                    ${textoStatusVisual.toUpperCase()}
+                </span>
+            </td>
             <td>${botaoAcao}</td>
         `;
         tbody.appendChild(tr);
     });
 }
-
 
 async function solicitarDevolucao(emprestimoId) {
     clearFeedback();
@@ -142,8 +169,7 @@ async function solicitarDevolucao(emprestimoId) {
         alert(`Solicitação do empréstimo #${emprestimoId} enviada! Entregue o livro físico ao bibliotecário.`);
         showFeedback('Solicitação de devolução registrada com sucesso!', 'success');
         
-        carregarLivros();
-        carregarEmprestimos();
+        await inicializarDados();
     } catch (error) {
         showFeedback(error.message, 'error');
     }
@@ -157,6 +183,5 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     clearFeedback();
-    carregarLivros();
-    carregarEmprestimos();
+    inicializarDados();
 });
