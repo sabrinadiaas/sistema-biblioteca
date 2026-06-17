@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const { autenticar } = require('../middleware/auth'); // middleware de segurança
+const { autenticar } = require('../middleware/auth');
 
-//funçao auxiliar para usar async/await com o mysql
 const queryAsync = (sql, params) => {
     return new Promise((resolve, reject) => {
         db.query(sql, params, (err, results) => {
@@ -13,7 +12,6 @@ const queryAsync = (sql, params) => {
     });
 };
 
-// GET: listar todos os livros
 router.get('/', autenticar, async (req, res) => {
     try {
         const livros = await queryAsync('SELECT * FROM livros', []);
@@ -24,9 +22,7 @@ router.get('/', autenticar, async (req, res) => {
     }
 });
 
-// POST: adicionar novo livro
 router.post('/', autenticar, async (req, res) => {
-    // Regra de Negócio: Apenas bibliotecários podem adicionar livros
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Acesso negado. Apenas bibliotecários podem cadastrar livros.' });
     }
@@ -48,7 +44,6 @@ router.post('/', autenticar, async (req, res) => {
     }
 });
 
-// PUT: editar um livro existente
 router.put('/:id', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Acesso negado.' });
@@ -67,7 +62,6 @@ router.put('/:id', autenticar, async (req, res) => {
     }
 });
 
-//DELETE: remover um livro
 router.delete('/:id', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Acesso negado.' });
