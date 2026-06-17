@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const auth = require('../middleware/auth');
+const { autenticar } = require('../middleware/auth');
 
 // função auxiliar para o mysql
 const queryAsync = (sql, params) => {
@@ -14,7 +14,7 @@ const queryAsync = (sql, params) => {
 };
 
 // CRIAR EMPRÉSTIMO (POST)
-router.post('/', auth, async (req, res) => {
+router.post('/', autenticar, async (req, res) => {
     // regra: apenas leitores podem solicitar empréstimos
     if (req.usuario.perfil !== 'leitor') {
         return res.status(403).json({ error: 'Apenas leitores podem solicitar empréstimos.' });
@@ -56,7 +56,7 @@ router.post('/', auth, async (req, res) => {
 
 
 // LISTAR EMPRÉSTIMOS (GET)
-router.get('/', auth, async (req, res) => {
+router.get('/', autenticar, async (req, res) => {
     try {
         let sql = `
             SELECT e.*, l.titulo AS nome_livro, u.nome AS nome_leitor 
@@ -82,7 +82,7 @@ router.get('/', auth, async (req, res) => {
 
 
 // APROVAR DEVOLUÇÃO (PUT)
-router.put('/:id/devolucao', auth, async (req, res) => {
+router.put('/:id/devolucao', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Apenas bibliotecários podem aprovar devoluções.' });
     }
