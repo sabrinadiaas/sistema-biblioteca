@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Bibliotecário</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="panel-container">
+        <div class="header-panel">
+            <h2>Painel Administrativo do Bibliotecário</h2>
+            <button id="logout-btn" class="logout-btn">Sair do Sistema</button>
+        </div>
+
+        <div id="feedback-panel" class="message"></div>
+
+        <div class="section-box">
+            <h3 id="form-title">Cadastrar Novo Livro</h3>
+            <form id="livro-form" class="inline-form">
+                <input type="hidden" id="livro-id">
+                <div class="form-group">
+                    <label for="livro-titulo">Título</label>
+                    <input type="text" id="livro-titulo" required placeholder="Ex: Dom Casmurro">
+                </div>
+                <div class="form-group">
+                    <label for="livro-autor">Autor</label>
+                    <input type="text" id="livro-autor" required placeholder="Ex: Machado de Assis">
+                </div>
+                <div class="form-group">
+                    <label for="livro-ano">Ano de Publicação</label>
+                    <input type="number" id="livro-ano" placeholder="Ex: 1899">
+                </div>
+                <div class="form-group">
+                    <label for="livro-qtd">Quantidade</label>
+                    <input type="number" id="livro-qtd" required min="0" placeholder="Ex: 5">
+                </div>
+                <button type="submit" id="save-btn">Salvar</button>
+                <button type="button" id="cancel-edit-btn" class="delete-btn hidden">Cancelar</button>
+            </form>
+        </div>
+
+        <div class="section-box">
+            <h3>Acervo de Livros</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Ano</th>
+                            <th>Qtd. Disponível</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="livros-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <h3>Histórico e Controle de Empréstimos</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Livro</th>
+                            <th>Leitor</th>
+                            <th>Data Empréstimo</th>
+                            <th>Data Prevista</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emprestimos-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="bibliotecario.js"></script>
+</body>
+</html>
