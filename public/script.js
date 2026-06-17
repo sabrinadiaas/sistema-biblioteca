@@ -1,5 +1,5 @@
 
-const API_URL = 'http://localhost:3000'; 
+const API_URL = 'http://localhost:3000/api';
 
 const loginSection = document.getElementById('login-section');
 const registerSection = document.getElementById('register-section');
