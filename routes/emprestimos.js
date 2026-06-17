@@ -13,49 +13,41 @@ const queryAsync = (sql, params) => {
     });
 };
 
-// CRIAR EMPRÉSTIMO (POST)
+// 1. CRIAR EMPRÉSTIMO (POST)
 router.post('/', autenticar, async (req, res) => {
-    // regra: apenas leitores podem solicitar empréstimos
     if (req.usuario.perfil !== 'leitor') {
         return res.status(403).json({ error: 'Apenas leitores podem solicitar empréstimos.' });
     }
 
     const { livro_id } = req.body;
-    const leitor_id = req.usuario.id; // ID do token de segurança
+    const leitor_id = req.usuario.id;
 
     try {
-        // verificando se o livro existe e se tem estoque
-        const livros = await queryAsync('SELECT quantidade_disponivel FROM livros WHERE id = ?', [livro_id]);
+        const libros = await queryAsync('SELECT quantidade_disponivel FROM livros WHERE id = ?', [livro_id]);
         
-        if (livros.length === 0) return res.status(404).json({ error: 'Livro não encontrado.' });
-        if (livros[0].quantidade_disponivel <= 0) return res.status(400).json({ error: 'Livro fora de estoque no momento.' });
+        if (libros.length === 0) return res.status(404).json({ error: 'Livro não encontrado.' });
+        if (libros[0].quantidade_disponivel <= 0) return res.status(400).json({ error: 'Livro fora de estoque no momento.' });
 
-        // calculando as datas hj e daqui a 7 dias
         const hoje = new Date();
         const dataDevolucaoPrevista = new Date();
-        dataDevolucaoPrevista.setDate(hoje.getDate() + 7); // prazo de 7 diaas
+        dataDevolucaoPrevista.setDate(hoje.getDate() + 7);
 
-        // mudando para o padrão do mysql (YYYY-MM-DD)
         const data_emprestimo = hoje.toISOString().split('T')[0];
         const data_prevista = dataDevolucaoPrevista.toISOString().split('T')[0];
 
-        // salvando o empréstimo (status nasce como 'ativo')
         const sqlEmprestimo = `INSERT INTO emprestimos (livro_id, leitor_id, data_emprestimo, data_devolucao_prevista, status) VALUES (?, ?, ?, ?, 'ativo')`;
         await queryAsync(sqlEmprestimo, [livro_id, leitor_id, data_emprestimo, data_prevista]);
 
-        // diminuindo o estoque do livro
         await queryAsync('UPDATE livros SET quantidade_disponivel = quantidade_disponivel - 1 WHERE id = ?', [livro_id]);
 
         res.status(201).json({ message: 'Empréstimo realizado com sucesso!' });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao processar o empréstimo.' });
     }
 });
 
-
-// LISTAR EMPRÉSTIMOS (GET)
+// 2. LISTAR EMPRÉSTIMOS (GET)
 router.get('/', autenticar, async (req, res) => {
     try {
         let sql = `
@@ -66,7 +58,6 @@ router.get('/', autenticar, async (req, res) => {
         `;
         let params = [];
 
-        // se for leitor pedidno, ve apenas os dele. se for bibliotecário, v6e todos.
         if (req.usuario.perfil === 'leitor') {
             sql += ' WHERE e.leitor_id = ?';
             params.push(req.usuario.id);
@@ -74,14 +65,36 @@ router.get('/', autenticar, async (req, res) => {
 
         const emprestimos = await queryAsync(sql, params);
         res.status(200).json(emprestimos);
-
     } catch (error) {
         res.status(500).json({ error: 'Erro ao buscar empréstimos.' });
     }
 });
 
+// 3. NOVA ROTA ADICIONADA: SOLICITAR DEVOLUÇÃO (PUT) - Chamada pelo painel do Leitor
+router.put('/:id/solicitar-devolucao', autenticar, async (req, res) => {
+    if (req.usuario.perfil !== 'leitor') {
+        return res.status(403).json({ error: 'Acesso negado.' });
+    }
 
-// APROVAR DEVOLUÇÃO (PUT)
+    const emprestimoId = req.params.id;
+    const hoje = new Date().toISOString().split('T')[0];
+
+    try {
+        const emprestimos = await queryAsync('SELECT status FROM emprestimos WHERE id = ? AND leitor_id = ?', [emprestimoId, req.usuario.id]);
+        if (emprestimos.length === 0) return res.status(404).json({ error: 'Empréstimo não encontrado.' });
+        if (emprestimos[0].status === 'devolvido') return res.status(400).json({ error: 'Este livro já foi devolvido.' });
+
+        // Em vez de mudar o status para 'pendente' (que quebra o seu MySQL), preenchemos a data real de entrega para sinalizar que o leitor já entregou.
+        await queryAsync(`UPDATE emprestimos SET data_devolucao_real = ? WHERE id = ?`, [hoje, emprestimoId]);
+        
+        res.status(200).json({ message: 'Solicitação registrada com sucesso!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao registrar solicitação de devolução.' });
+    }
+});
+
+// 4. APROVAR DEVOLUÇÃO (PUT) - Chamada pelo Bibliotecário
 router.put('/:id/devolucao', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Apenas bibliotecários podem aprovar devoluções.' });
@@ -90,23 +103,19 @@ router.put('/:id/devolucao', autenticar, async (req, res) => {
     const emprestimoId = req.params.id;
 
     try {
-        //anchando o livro
         const emprestimos = await queryAsync('SELECT livro_id, status FROM emprestimos WHERE id = ?', [emprestimoId]);
         
         if (emprestimos.length === 0) return res.status(404).json({ error: 'Empréstimo não encontrado.' });
         if (emprestimos[0].status === 'devolvido') return res.status(400).json({ error: 'Este livro já foi devolvido.' });
 
         const livroId = emprestimos[0].livro_id;
-        const hoje = new Date().toISOString().split('T')[0]; // Data real da entrega
+        const hoje = new Date().toISOString().split('T')[0];
 
-        // atualizando o empréstimo para 'devolvido'
+        // Atualiza definitivamente para 'devolvido'
         await queryAsync(`UPDATE emprestimos SET status = 'devolvido', data_devolucao_real = ? WHERE id = ?`, [hoje, emprestimoId]);
-
-        // devolvendo o livro (estoque aumenta)
         await queryAsync('UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id = ?', [livroId]);
 
         res.status(200).json({ message: 'Devolução aprovada com sucesso! Estoque atualizado.' });
-
     } catch (error) {
         res.status(500).json({ error: 'Erro ao registrar devolução.' });
     }
