@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../db');
 const { autenticar } = require('../middleware/auth');
 
-// função auxiliar para o mysql
 const queryAsync = (sql, params) => {
     return new Promise((resolve, reject) => {
         db.query(sql, params, (err, results) => {
@@ -13,7 +12,6 @@ const queryAsync = (sql, params) => {
     });
 };
 
-// 1. CRIAR EMPRÉSTIMO (POST)
 router.post('/', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'leitor') {
         return res.status(403).json({ error: 'Apenas leitores podem solicitar empréstimos.' });
@@ -47,7 +45,6 @@ router.post('/', autenticar, async (req, res) => {
     }
 });
 
-// 2. LISTAR EMPRÉSTIMOS (GET)
 router.get('/', autenticar, async (req, res) => {
     try {
         let sql = `
@@ -70,7 +67,6 @@ router.get('/', autenticar, async (req, res) => {
     }
 });
 
-// 3. NOVA ROTA ADICIONADA: SOLICITAR DEVOLUÇÃO (PUT) - Chamada pelo painel do Leitor
 router.put('/:id/solicitar-devolucao', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'leitor') {
         return res.status(403).json({ error: 'Acesso negado.' });
@@ -84,7 +80,6 @@ router.put('/:id/solicitar-devolucao', autenticar, async (req, res) => {
         if (emprestimos.length === 0) return res.status(404).json({ error: 'Empréstimo não encontrado.' });
         if (emprestimos[0].status === 'devolvido') return res.status(400).json({ error: 'Este livro já foi devolvido.' });
 
-        // Em vez de mudar o status para 'pendente' (que quebra o seu MySQL), preenchemos a data real de entrega para sinalizar que o leitor já entregou.
         await queryAsync(`UPDATE emprestimos SET data_devolucao_real = ? WHERE id = ?`, [hoje, emprestimoId]);
         
         res.status(200).json({ message: 'Solicitação registrada com sucesso!' });
@@ -94,7 +89,7 @@ router.put('/:id/solicitar-devolucao', autenticar, async (req, res) => {
     }
 });
 
-// 4. APROVAR DEVOLUÇÃO (PUT) - Chamada pelo Bibliotecário
+
 router.put('/:id/devolucao', autenticar, async (req, res) => {
     if (req.usuario.perfil !== 'bibliotecario') {
         return res.status(403).json({ error: 'Apenas bibliotecários podem aprovar devoluções.' });
@@ -111,7 +106,6 @@ router.put('/:id/devolucao', autenticar, async (req, res) => {
         const livroId = emprestimos[0].livro_id;
         const hoje = new Date().toISOString().split('T')[0];
 
-        // Atualiza definitivamente para 'devolvido'
         await queryAsync(`UPDATE emprestimos SET status = 'devolvido', data_devolucao_real = ? WHERE id = ?`, [hoje, emprestimoId]);
         await queryAsync('UPDATE livros SET quantidade_disponivel = quantidade_disponivel + 1 WHERE id = ?', [livroId]);
 
