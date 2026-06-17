@@ -1,5 +1,4 @@
 
-
 * {
     margin: 0;
     padding: 0;
@@ -13,25 +12,34 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 2rem 1rem;
+    color: #333;
 }
 
 .container {
     background-color: #ffffff;
     padding: 2.5rem;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     width: 100%;
-    max-width: 450px;
 }
 
-h2 {
-    color: #333;
-    margin-bottom: 1.5rem;
-    text-align: center;
+.container-login {
+    max-width: 450px;
+    margin: 0 auto;
 }
+
+
+.container-painel {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
 
 .form-group {
     margin-bottom: 1.2rem;
+    width: 100%;
+    text-align: left;
 }
 
 label {
@@ -55,6 +63,80 @@ input:focus, select:focus {
     border-color: #0056b3;
 }
 
+.toggle-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.toggle-link a {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.toggle-link a:hover {
+    text-decoration: underline;
+}
+
+
+h2 {
+    color: #222;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+
+.container-painel h2 {
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+h3 {
+    color: #444;
+    margin: 2rem 0 1rem 0;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: #fdfdfd;
+}
+
+
 button {
     width: 100%;
     padding: 0.75rem;
@@ -73,21 +155,55 @@ button:hover {
     background-color: #004085;
 }
 
-.toggle-link {
-    text-align: center;
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-    color: #666;
+
+.btn-tabela {
+    width: auto;
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin: 0;
 }
 
-.toggle-link a {
-    color: #0056b3;
-    text-decoration: none;
+.btn-devolver {
+    background-color: #dc3545;
+}
+
+.btn-devolver:hover {
+    background-color: #bd2130;
+}
+
+
+#logout-btn {
+    width: auto;
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background-color: #6c757d;
+    margin-top: 0;
+}
+
+#logout-btn:hover {
+    background-color: #5a6268;
+}
+
+/* --- 7. BADGES DE STATUS --- */
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
     font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
-.toggle-link a:hover {
-    text-decoration: underline;
+.status-ativo {
+    background-color: #e2f0d9;
+    color: #385723;
+}
+
+.status-devolvido {
+    background-color: #f2f2f2;
+    color: #595959;
 }
 
 .message {
@@ -112,7 +228,6 @@ button:hover {
     border: 1px solid #c3e6cb;
     display: block;
 }
-
 
 .hidden {
     display: none !important;
