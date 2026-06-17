@@ -85,4 +85,10 @@ router.post('/login', async (req, res) => {
     }
 });
 
+const livrosRoutes = require('./livros');
+const emprestimosRoutes = require('./emprestimos');
+
+router.use('/livros', livrosRoutes);
+router.use('/emprestimos', emprestimosRoutes);
+
 module.exports = router;
